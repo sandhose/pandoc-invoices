@@ -1,0 +1,170 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass[$fontsize$, a4paper]{article}
+
+% LAYOUT
+%--------------------------------
+\usepackage{geometry}
+\geometry{$geometry$}
+
+% No page numbers
+\pagenumbering{gobble}
+
+% Left align
+\usepackage[document]{ragged2e}
+
+\usepackage{setspace}
+
+$if(letterhead)$
+  % To include the letterhead
+  \usepackage{wallpaper}
+  \ULCornerWallPaper{1}{letterhead.pdf}
+$endif$
+
+% TYPOGRAPHY
+%--------------------------------
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+
+% converts LaTeX specials (quotes, dashes etc.) to Unicode
+\defaultfontfeatures{Mapping=tex-text}
+
+% Set paragraph break
+\setlength{\parskip}{1em}
+
+$if(seriffont)$
+\setmainfont[SmallCapsFeatures={LetterSpace=5,Letters=SmallCaps}]{$seriffont$}
+$endif$
+$if(sansfont)$
+    \setsansfont{$sansfont$}
+$endif$
+
+% Command required by how Pandoc handles the list conversion
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% TABLE CUSTOMIZATION
+%--------------------------------
+\usepackage{spreadtab}
+\usepackage[compact]{titlesec} % For customizing title sections
+\titlespacing*{\section}{0pt}{3pt}{-7pt} % Remove margin bottom from the title
+\usepackage{arydshln} % For the dotted line on the table
+\renewcommand{\arraystretch}{1.5} % Apply vertical padding to table cells
+\usepackage{hhline} % For single-cell borders
+\usepackage{enumitem} % For customizing lists
+\setlist{nolistsep} % No whitespace around list items
+\setlist[itemize]{leftmargin=0.5cm} % Reduce list left indent
+\setlength{\tabcolsep}{9pt} % Larger gutter between columns
+
+
+% LANGUAGE
+%--------------------------------
+$if(lang)$
+\usepackage[$lang$]{babel}
+$endif$
+
+% PDF SETUP
+%--------------------------------
+\usepackage[xetex, bookmarks, colorlinks, breaklinks]{hyperref}
+\hypersetup
+{
+  pdfauthor=$author$,
+  pdfsubject=Facture \#$invoice-nr$,
+  pdftitle=Facture \#$invoice-nr$,
+  linkcolor=blue,
+  citecolor=blue,
+  filecolor=black,
+  urlcolor=blue
+}
+
+% DOCUMENT
+%--------------------------------
+\begin{document}
+\small
+\textsc{\textbf{$author$}}
+$for(from)$
+\textbullet{} \textsc{$from$}
+$endfor$
+
+\vspace{1em}
+
+\fbox{
+  \begin{minipage}{0.5\textwidth}
+    \vspace{0.5em}
+    \small \sffamily \onehalfspacing
+    $for(to)$
+    $to$\\
+    $endfor$
+    \vspace{0.5em}
+  \end{minipage}
+}
+
+\vspace{3em}
+
+\begin{flushright}
+  \small
+  $city$, le \today
+\end{flushright}
+
+\vspace{1em}
+
+
+\section*{\textsc{Facture} \textsc{\#$invoice-nr$}}
+\footnotesize
+\newcounter{pos}
+\setcounter{pos}{0}
+\STautoround*{2} % Get spreadtab to always display the decimal part
+$if(commasep)$\STsetdecimalsep{,}$endif$ % Use comma as decimal separator
+
+\sffamily
+
+\begin{spreadtab}{{tabular}[t t t t]{lp{8.2cm}rr}}
+  \hdashline[1pt/1pt]
+  @ \noalign{\vskip 2mm} \textbf{\#} & @ \textbf{Description} & @ \textbf{$if(unit.name)$$unit.name$$else$Quantité$endif$} & @ \textbf{Prix} \\ \hline
+$for(service)$
+          @ \noalign{\vskip 2mm} \refstepcounter{pos} \thepos
+        & @ $service.description$
+        $if(service.details)$\newline \begin{itemize}
+          $for(service.details)$\scriptsize \item $service.details$
+          $endfor$ \end{itemize}
+        $endif$& :={$service.quantity$}$unit.suffix$
+        & :={[-1,0] * $rate$}€ \\
+$endfor$
+  \noalign{\vskip 2mm} \hline & @ \multicolumn{1}{r}{\textbf{Total:}}
+  & \textbf{:={sum(c1:[0,-1])}$unit.suffix$}
+  & \textbf{:={sum(d1:[0,-1])}€} \\ \hhline{~~--}
+\end{spreadtab}
+
+
+\vspace{15mm}
+
+$if(payment)$
+\paragraph{Coordonnées bancaires} ~\\[5pt]
+
+\sffamily
+\begin{tabular}{rl}
+  \textbf{Titulaire} & $payment.holder$ \\
+  \textbf{RIB}       & $payment.rib$ \\
+  \textbf{IBAN}      & $payment.iban$ \\
+  \textbf{BIC}       & $payment.bic$ \\
+\end{tabular}
+$endif$
+
+
+\vfill
+\rule{\textwidth}{1pt}
+
+\begin{minipage}{\textwidth}
+  \footnotesize
+  \itshape
+  \sffamily
+  \onehalfspacing
+  \centering
+  $for(footer)$
+  $footer$ \\
+  $endfor$
+\end{minipage}
+
+\end{document}
