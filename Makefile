@@ -7,7 +7,7 @@ OUT=$(INVOICES:invoices/%.yml=out/%.pdf)
 all: $(OUT)
 
 out/%.pdf: invoices/%.yml $(META) $(TEMPLATE)
-	pandoc $(META) $< --template=$(TEMPLATE) -o $@ --latex-engine=xelatex
+	pandoc $(META) $< --template=$(TEMPLATE) -o $@ --pdf-engine=xelatex
 
 clean:
 	$(RM) $(OUT)

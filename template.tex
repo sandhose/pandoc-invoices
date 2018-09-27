@@ -47,6 +47,7 @@ $endif$
 
 % TABLE CUSTOMIZATION
 %--------------------------------
+\usepackage{tabularx}
 \usepackage{spreadtab}
 \usepackage[compact]{titlesec} % For customizing title sections
 \titlespacing*{\section}{0pt}{3pt}{-7pt} % Remove margin bottom from the title
@@ -62,7 +63,19 @@ $endif$
 % LANGUAGE
 %--------------------------------
 $if(lang)$
-\usepackage[$lang$]{babel}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[shorthands=off,$for(babel-otherlangs)$$babel-otherlangs$,$endfor$main=$babel-lang$]{babel}
+$if(babel-newcommands)$
+  $babel-newcommands$
+$endif$
+\else
+  % load polyglossia as late as possible as it *could* call bidi if RTL lang (e.g. Hebrew or Arabic)
+  \usepackage{polyglossia}
+  \setmainlanguage[$polyglossia-lang.options$]{$polyglossia-lang.name$}
+$for(polyglossia-otherlangs)$
+  \setotherlanguage[$polyglossia-otherlangs.options$]{$polyglossia-otherlangs.name$}
+$endfor$
+\fi
 $endif$
 
 % PDF SETUP
@@ -120,7 +133,7 @@ $if(commasep)$\STsetdecimalsep{,}$endif$ % Use comma as decimal separator
 
 \sffamily
 
-\begin{spreadtab}{{tabular}[t t t t]{lp{8.2cm}rr}}
+\begin{spreadtab}{{tabularx}{\textwidth}{lXrrr}}
   \hdashline[1pt/1pt]
   @ \noalign{\vskip 2mm} \textbf{\#} & @ \textbf{Description} & @ \textbf{$if(unit.name)$$unit.name$$else$Quantité$endif$} & @ \textbf{Prix} \\ \hline
 $for(service)$
@@ -137,10 +150,19 @@ $endfor$
   & \textbf{:={sum(d1:[0,-1])}€} \\ \hhline{~~--}
 \end{spreadtab}
 
+\vspace{10mm}
 
-\vspace{15mm}
+$body$
+
+\vspace{5mm}
 
 $if(payment)$
+{
+  \itshape
+  $for(payment.conditions)$
+  $payment.conditions$ \\
+  $endfor$
+}
 \paragraph{Coordonnées bancaires} ~\\[5pt]
 
 \sffamily
