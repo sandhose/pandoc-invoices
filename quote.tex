@@ -84,8 +84,8 @@ $endif$
 \hypersetup
 {
   pdfauthor=$author$,
-  pdfsubject=Facture \#$invoice-nr$,
-  pdftitle=Facture \#$invoice-nr$,
+  pdfsubject=Devis \#$quote-nr$,
+  pdftitle=Devis \#$quote-nr$,
   linkcolor=blue,
   citecolor=blue,
   filecolor=black,
@@ -114,17 +114,17 @@ $endfor$
   \end{minipage}
 }
 
-\vspace{3em}
+\vspace{2em}
 
 \begin{flushright}
   \small
   $city$, le $if(date)$$date$$else$\today$endif$
 \end{flushright}
 
-\vspace{1em}
+\vspace{0.5em}
 
 
-\section*{\textsc{Facture} \textsc{\#$invoice-nr$}}
+\section*{\textsc{Devis} \textsc{\#$quote-nr$}}
 \footnotesize
 \newcounter{pos}
 \setcounter{pos}{0}
@@ -152,17 +152,31 @@ $endfor$
 
 \vspace{10mm}
 
-$body$
+$if(body)$
+{
+  \setlength{\parskip}{3mm}
+  $body$
+}
 
-\vspace{5mm}
+\rule{\textwidth}{0.5pt}
+$endif$
 
-$if(payment)$
 {
   \itshape
-  $for(payment.conditions)$
-  $payment.conditions$ \\
+  $if(validity)$
+    Validité du devis : $validity$ \\
+  $endif$
+  $if(payment_when)$
+    Conditions de règlement : $payment_when$ \\
+  $endif$
+  $for(quote.infos)$
+  $quote.infos$ \\
   $endfor$
 }
+
+\vfill
+
+$if(payment)$
 \paragraph{Coordonnées bancaires} ~\\[5pt]
 
 \sffamily
@@ -175,7 +189,10 @@ $if(payment)$
 $endif$
 
 
-\vfill
+%Date et signature:
+
+%\vspace{12mm}
+
 \rule{\textwidth}{1pt}
 
 \begin{minipage}{\textwidth}
